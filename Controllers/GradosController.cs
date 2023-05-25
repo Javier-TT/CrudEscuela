@@ -64,9 +64,9 @@ namespace CrudEscuela.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Grado grado)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.grados.Update(grado);
+                //_context.grados.Update(grado);
                 _context.SaveChanges();
 
                 TempData["mensaje"] = "El grado se ha Actualizado correctamente";
@@ -107,7 +107,7 @@ namespace CrudEscuela.Controllers
                 return NotFound();
             }
 
-            _context.grados.Remove(grado);
+            //_context.grados.Remove(grado);
             _context.SaveChanges();
 
             TempData["mensaje"] = "El grado se ha Eliminado correctamente";
