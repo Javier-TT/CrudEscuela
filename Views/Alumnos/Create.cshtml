@@ -1,0 +1,118 @@
+﻿@model CrudEscuela.Models.Alumno
+@{
+    ViewData["Title"] = "Crear Nuevo Alumno";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <h3>Crear Nuevo Alumnos</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-10">
+            <form method="post" asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for=" Nombre" class="control-label"></label>
+                    <input asp-for="Nombre" class="form-control" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                </div>
+
+                 <div class="form-group">
+                    <label asp-for="Apellidos" class="control-label"></label>
+                    <input asp-for="Apellidos" class="form-control" />
+                    <span asp-validation-for="Apellidos" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for=" Estatus" class="control-label"></label>
+                    <input asp-for="Estatus" class="form-control" />
+                    <span asp-validation-for="Estatus" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for=" FechadeAlta" class="control-label"></label>
+                    <input asp-for="FechadeAlta" class="form-control" />
+                    <span asp-validation-for="FechadeAlta" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GradoId" class="control-label"></label>
+                    <input asp-for="GradoId" class="form-control" />
+                    <span asp-validation-for="GradoId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Estado" class="control-label"></label>
+                    <div class="form-check">
+                        <input asp-for="Estado" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label" asp-for="Estado"></label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn-primary  btnCrear">Crear Alumno</button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+   $(document).ready(function () {
+    $('.btnCrear').click(function () {
+        // Obtener los valores de los campos del formulario
+        var nombre = $('#nombre').val();
+        var apellido = $('#apellido').val();
+        // Obtener otros campos necesarios para la creación del alumno
+
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡Se creará un nuevo alumno!",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, Crear'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/Alumnos/Create',
+                    type: 'POST',
+                    data: {
+                        nombre: nombre,
+                        apellido: apellido
+                        // Agregar otros campos necesarios para la creación del alumno
+                    },
+                    success: function (data) {
+                        // Realizar acciones adicionales después de la creación del alumno
+                        // Por ejemplo, redireccionar a la página de detalles del alumno o mostrar un mensaje de éxito
+
+                        Swal.fire(
+                            'Creado',
+                            'El alumno ha sido creado correctamente.',
+                            'success'
+                        );
+                    }
+                });
+            }
+        });
+    });
+   });
+
+</script>
+
+@section scripts{
+
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
+
+

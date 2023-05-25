@@ -1,0 +1,231 @@
+﻿@model List<CrudEscuela.Models.AlumnoViewModel>
+@{
+    ViewData["Title"] = "Lista de Alumno";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container">
+
+    @if (TempData["mensaje"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["mensaje"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="close">
+                <span aria-hidden="true">&times;</span>
+            </button>  
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-sm-6">
+            <h3>Lista de Alumnos</h3>
+        </div>
+        <div class="col-sm-6">
+            <a class="btn btn-success d-block" asp-action="Create" asp-controller="Alumnos"> <i class="bi bi-person-plus"></i> Agregar Nuevo Alumno</a>
+        </div>
+    </div>
+
+
+
+    <div class="row mb-3">
+        <div class="col-sm-4">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" class="form-control" />
+        </div>
+
+        <div class="col-sm-4">
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido" class="form-control" />
+        </div>
+        <div class="col-sm-4">
+            <label for="estado">Estado:</label>
+            <select id="estado" name="estado" class="form-control">
+                <option value="">-- Todos --</option>
+                <option value="true">Alta</option>
+                <option value="false">Baja</option>
+            </select>
+        </div>
+    </div>
+
+    <button id="btnBuscar" class="btn btn-primary">Buscar</button>
+   
+    <div class="row">
+        @if (Model.Count() > 0)
+        {
+
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <td>Id del Alumno</td>
+                        <td>Nombre</td>
+                        <td>Apellidos</td>
+                        <td>Estatus</td>
+                        <td>Fecha de Alta</td>
+                        <td>Estado</td>
+                        <td>Semestre</td>
+                        <td>Acciones</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.IdAlumno</td>
+                            <td>@item.NombreAlumno</td>
+                            <td>@item.ApellidosAlumno</td>
+                            <td>@item.EstatusAlumno</td>
+                            <td>@item.FechadeAltaAlumno</td>
+                            <td class="estado-alumno"> @if (item.EstadoAlumno)
+                                {
+                                <span>Alta</span>
+                                }
+                                else
+                                {
+                                <span>baja</span>
+                                }
+                            </td>
+                            <td>@item.SemestreGrado</td>
+
+                            <td>
+                                <a asp-controller="Alumnos" asp-action="Edit" asp-route-id="@item.IdAlumno" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Editar</a>
+                                <button class="btn btn-danger btnEliminar" data-alumno-id="@item.IdAlumno">
+                                    <i class="bi bi-trash"></i>Eliminar
+                                </button>
+
+                                <button class="btn btnAlternar alumno-btn @((item.EstadoAlumno) ? "btn-success" : "btn-danger")" data-alumno-id="@item.IdAlumno">
+                                    @if (item.EstadoAlumno)
+                                    {
+                                        <i class="bi bi-check">  ACTIVO</i>
+                                      
+                                            }
+                                    else
+                                    {
+                                        <i class="bi bi-x">DESACTIVADO</i>
+                                        
+                                            }
+                                </button>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No hay registro</p>
+        }
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    $(document).ready(function () {
+        // Evento click del botón "Alternar"
+        $('.btnAlternar').click(function () {
+            var boton = $(this);
+            var alumnoId = boton.data('alumno-id');
+
+            // Mostrar ventana emergente de confirmación
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'SI, Realizalo!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Alumnos/Toggle',
+                        type: 'POST',
+                        data: { id: alumnoId },
+                        success: function (data) {
+                            // Alternar el estado del alumno y el estilo del botón
+                            boton.toggleClass('btn-success btn-danger');
+                            boton.find('i').toggleClass('bi-check bi-x');
+
+                            // Actualizar el texto del botón
+                            if (boton.hasClass('btn-success')) {
+                                boton.html('<i class="bi bi-check"></i>ACTIVO');
+                            } else {
+                                boton.html('<i class="bi bi-x"></i>DESACTIVADO');
+                            }
+
+                            // Actualizar el valor de la columna de estado en la tabla
+                            var estadoColumna = boton.closest('tr').find('.estado-alumno');
+                            estadoColumna.text(boton.hasClass('btn-success') ? 'Alta' : 'Baja');
+
+                            // Mostrar alerta de éxito
+                            Swal.fire(
+                                'EXITO!',
+                                'Se ha alternado el estado Estudiante',
+                                'success'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+
+        // Evento click del botón "Buscar"
+        $('#btnBuscar').click(function () {
+            // Obtener los valores de los filtros
+            var nombre = $('#nombre').val();
+            var apellido = $('#apellido').val();
+            var estado = $('#estado').val();
+
+            // Redireccionar a la página Index con los filtros aplicados
+            window.location.href = '/Alumnos/Index?nombre=' + nombre + '&apellido=' + apellido + '&estado=' + estado;
+        });
+    });
+
+    $('.btnEliminar').click(function () {
+        var boton = $(this);
+        var alumnoId = boton.data('alumno-id');
+
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡No podrás revertir esto!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, Eliminar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/Alumnos/Eliminar',
+                    type: 'POST',
+                    data: { id: alumnoId },
+                    success: function (data) {
+                        // Ocultar la fila correspondiente en la tabla
+                        boton.closest('tr').fadeOut(500, function () {
+                            $(this).remove();
+                        });
+
+                        // Mostrar mensaje de éxito
+                        Swal.fire(
+                            'Eliminado',
+                            'El alumno ha sido eliminado correctamente.',
+                            'success'
+                        );
+                    }
+                });
+            }
+        });
+    });
+    
+
+</script>
+
+
+    
+
+
