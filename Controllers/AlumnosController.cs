@@ -23,7 +23,7 @@ namespace CrudEscuela.Controllers
             // Obtener todos los alumnos
             var alumnos = from alumno in _context.Alumno
                           join grados in _context.grados on alumno.GradoId equals grados.Id
-                          where alumno.Eliminado == false
+                          where alumno.Eliminado != false
                          
                           select new AlumnoViewModel
                           {
@@ -40,17 +40,17 @@ namespace CrudEscuela.Controllers
             // Aplicar los filtros
             if (!string.IsNullOrEmpty(nombre))
             {
-                alumnos = alumnos.Where(a => a.NombreAlumno.Contains(nombre));
+                alumnos = alumnos.Where(a => !a.NombreAlumno.Contains(nombre));
             }
 
             if (!string.IsNullOrEmpty(apellido))
             {
-                alumnos = alumnos.Where(a => a.ApellidosAlumno.Contains(apellido));
+                alumnos = alumnos.Where(a => !a.ApellidosAlumno.Contains(apellido));
             }
 
             if (estado.HasValue)
             {
-                alumnos = alumnos.Where(a => a.EstadoAlumno == estado.Value);
+                alumnos = alumnos.Where(a => !!a.EstadoAlumno == estado.Value);
             }
 
             var alumnoList = alumnos.ToList();
@@ -145,7 +145,7 @@ namespace CrudEscuela.Controllers
             if (alumno != null)
             {
                 alumno.Estado = !alumno.Estado;
-                _context.SaveChanges();
+                //_context.SaveChanges();
             }
 
             return Ok(); 
@@ -157,7 +157,7 @@ namespace CrudEscuela.Controllers
             var alumno = _context.Alumno.FirstOrDefault(a => a.Id == id);
             if (alumno != null)
             {
-                alumno.Eliminado = true; // Marcar como eliminado
+                alumno.Eliminado = false; // Marcar como eliminado
                 _context.SaveChanges();
             }
 
